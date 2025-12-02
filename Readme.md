@@ -1,4 +1,4 @@
-# Steps to reproduce the hanging issue when acquiring MicrosoftIdentityTokenCredential via Dependency Injection
+# Steps to reproduce the hanging issue
 
 ## Problem
 
@@ -28,5 +28,5 @@ dotnet publish .\MicrosoftIdentityCredentialHangRepro\MicrosoftIdentityCredentia
 ```
 4. Build the Docker image. I built the image by opening the solution in VS, right clicking the Dockerfile and selecting "Build Image".
 5. Open Docker Desktop and run the built image by specifing the port to bind.
-6. Open a web browser in the host machine and navigate to "http://localhost:<your_binding_port>/weatherforecast".
+6. Open a web browser in the host machine and navigate to "http://localhost:your_binding_port/weatherforecast".
 7. See in the aspnet core app logs that it hangs when trying to acquire the MicrosoftIdentityTokenCredential via Dependency Injection.
