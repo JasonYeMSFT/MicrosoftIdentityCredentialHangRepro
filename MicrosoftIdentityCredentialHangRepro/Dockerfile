@@ -2,29 +2,15 @@
 
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
 FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS base
-USER $APP_UID
+USER root
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-
-# This stage is used to build the service project
-FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
-ARG BUILD_CONFIGURATION=Release
-WORKDIR /src
-COPY ["MicrosoftIdentityCredentialHangRepro/MicrosoftIdentityCredentialHangRepro.csproj", "MicrosoftIdentityCredentialHangRepro/"]
-RUN dotnet restore "./MicrosoftIdentityCredentialHangRepro/MicrosoftIdentityCredentialHangRepro.csproj"
-COPY . .
-WORKDIR "/src/MicrosoftIdentityCredentialHangRepro"
-RUN dotnet build "./MicrosoftIdentityCredentialHangRepro.csproj" -c $BUILD_CONFIGURATION -o /app/build
-
-# This stage is used to publish the service project to be copied to the final stage
-FROM build AS publish
-ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./MicrosoftIdentityCredentialHangRepro.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
-
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
+# libc6-compat is necessary to run the pre-built linux-x64 binary
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
-COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "MicrosoftIdentityCredentialHangRepro.dll"]
+COPY MicrosoftIdentityCredentialHangRepro/bin/Release/net9.0/linux-x64/publish/ .
+ENTRYPOINT ["./MicrosoftIdentityCredentialHangRepro"]
